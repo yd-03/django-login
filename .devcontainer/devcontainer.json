@@ -1,0 +1,11 @@
+{
+  "name": "Django Login",
+  // Dockerfileを使用してイメージ・コンテナを作成
+  "dockerFile": "Dockerfile",
+  // リモート開発環境のVS Codeにインストールする拡張機能を指定
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}
