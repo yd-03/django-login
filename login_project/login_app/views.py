@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from .forms import SignupForm
+from django.shortcuts import redirect, render
+from .forms import SignupForm, LoginForm
+from django.contrib.auth import login
 
 
 def signup_view(request):
@@ -16,7 +17,17 @@ def signup_view(request):
 
 def login_view(request):
     # ユーザーのログイン
-    pass
+    if request.method == "POST":
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            if user:
+                login(request, user)
+                return redirect(to="/login_app/")
+    else:
+        form = LoginForm()
+    param = {"form": form}
+    return render(request, "login_app/login.html", param)
 
 
 def logout_view(request):
