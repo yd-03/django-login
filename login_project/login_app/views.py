@@ -1,6 +1,17 @@
+from django.shortcuts import render
+from .forms import SignupForm
+
+
 def signup_view(request):
     # ユーザーアカウントの登録
-    pass
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            form.save()
+    else:
+        form = SignupForm()
+    param = {"form": form}
+    return render(request, "login_app/signup.html", param)
 
 
 def login_view(request):
