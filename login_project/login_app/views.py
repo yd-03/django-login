@@ -1,7 +1,8 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import render, redirect
 from .forms import SignupForm, LoginForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 
 
 def signup_view(request):
@@ -24,10 +25,10 @@ def login_view(request):
             user = form.get_user()
             if user:
                 login(request, user)
-                return redirect(to="/login_app/")
+                return redirect(to="/login_app/user")
     else:
         form = LoginForm()
-    param = {"form": form}
+    param = {"title": "ログイン", "form": form}
     return render(request, "login_app/login.html", param)
 
 
@@ -37,6 +38,7 @@ def logout_view(request):
     return render(request, "login_app/logout.html")
 
 
+@login_required
 def user_view(request):
     # ユーザーの情報を表示
     user = request.user
@@ -44,6 +46,7 @@ def user_view(request):
     return render(request, "login_app/user.html", param)
 
 
+@login_required
 def other_view(request):
     # 他のユーザーの情報を表示
     users = User.objects.exclude(username=request.user.username)
