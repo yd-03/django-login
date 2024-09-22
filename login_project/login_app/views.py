@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from .forms import SignupForm, LoginForm
 from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 
 
 def signup_view(request):
@@ -38,9 +39,13 @@ def logout_view(request):
 
 def user_view(request):
     # ユーザーの情報を表示
-    pass
+    user = request.user
+    param = {"user": user}
+    return render(request, "login_app/user.html", param)
 
 
 def other_view(request):
     # 他のユーザーの情報を表示
-    pass
+    users = User.objects.exclude(username=request.user.username)
+    param = {"users": users}
+    return render(request, "login_app/other.html", param)
