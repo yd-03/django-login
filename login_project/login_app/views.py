@@ -20,15 +20,20 @@ def signup_view(request):
 def login_view(request):
     # ユーザーのログイン
     if request.method == "POST":
+        next = request.POST.get("next")
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             if user:
                 login(request, user)
-                return redirect(to="/login_app/user")
+                if next == "None":
+                    return redirect(to="/login_app/user")
+                else:
+                    return redirect(to=next)
     else:
         form = LoginForm()
-    param = {"title": "ログイン", "form": form}
+        next = request.GET.get("next")
+    param = {"form": form, "next": next}
     return render(request, "login_app/login.html", param)
 
 
