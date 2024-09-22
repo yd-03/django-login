@@ -1,61 +1,45 @@
-from django.shortcuts import render, redirect
 from .forms import SignupForm, LoginForm
-from django.contrib.auth import login, logout
+from django.contrib.auth import login
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView, LogoutView
+from django.views.generic import TemplateView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-def signup_view(request):
-    # ユーザーアカウントの登録
-    if request.method == "POST":
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect(to="/login_app/user/")
-    else:
-        form = SignupForm()
-    param = {"form": form}
-    return render(request, "login_app/signup.html", param)
+class MySignupView(CreateView):
+    template_name = "login_app/signup.html"
+    form_class = SignupForm
+    success_url = "/login_app/user/"
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+        user = self.object
+        login(self.request, user)
+        return result
 
 
-def login_view(request):
-    # ユーザーのログイン
-    if request.method == "POST":
-        next = request.POST.get("next")
-        form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            if user:
-                login(request, user)
-                if next == "None":
-                    return redirect(to="/login_app/user/")
-                else:
-                    return redirect(to=next)
-    else:
-        form = LoginForm()
-        next = request.GET.get("next")
-    param = {"form": form, "next": next}
-    return render(request, "login_app/login.html", param)
+class MyLoginView(LoginView):
+    template_name = "login_app/login.html"
+    form_class = LoginForm
 
 
-def logout_view(request):
-    # ユーザーのログアウト
-    logout(request)
-    return render(request, "login_app/logout.html")
+class MyLogoutView(LogoutView):
+    template_name = "login_app/logout.html"
 
 
-@login_required
-def user_view(request):
-    # ユーザーの情報を表示
-    user = request.user
-    param = {"user": user}
-    return render(request, "login_app/user.html", param)
+class MyUserView(LoginRequiredMixin, TemplateView):
+    template_name = "login_app/user.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["user"] = self.request.user
+        return context
 
 
-@login_required
-def other_view(request):
-    # 他のユーザーの情報を表示
-    users = User.objects.exclude(username=request.user.username)
-    param = {"users": users}
-    return render(request, "login_app/other.html", param)
+class MyOtherView(LoginRequiredMixin, TemplateView):
+    template_name = "login_app/other.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["users"] = User.objects.exclude(username=self.request.user.username)
+        return context
