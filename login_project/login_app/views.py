@@ -10,7 +10,9 @@ def signup_view(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            login(request, user)
+            return redirect(to="/login_app/user/")
     else:
         form = SignupForm()
     param = {"form": form}
@@ -27,7 +29,7 @@ def login_view(request):
             if user:
                 login(request, user)
                 if next == "None":
-                    return redirect(to="/login_app/user")
+                    return redirect(to="/login_app/user/")
                 else:
                     return redirect(to=next)
     else:
